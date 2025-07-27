@@ -1,37 +1,35 @@
-package com.tequila.ecommerce.vinoteca.controllers;
+package com.tequila.vinoteca.controllers;
 
-import com.tequila.ecommerce.vinoteca.models.User; 
-import com.tequila.ecommerce.vinoteca.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.tequila.vinoteca.models.User;
+import com.tequila.vinoteca.services.UserService;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
+@RequestMapping("/registro")
 public class RegistroController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    // Mostrar formulario de registro (GET)
-    @GetMapping("/registrarse")
-    public String mostrarFormularioRegistro() {
-        return "register"; // este es el nombre del HTML sin extensión (register.html en templates)
+    public RegistroController(UserService userService) {
+        this.userService = userService;
     }
 
-    // Procesar registro (POST)
-    @PostMapping("/registro")
-    public String procesarRegistro(
-            @RequestParam String username,
-            @RequestParam String email,
-            @RequestParam String password) {
+    @GetMapping
+    public String mostrarFormulario(Model model) {
+        model.addAttribute("usuario", new User());
+        return "registro";
+    }
 
-        User user = new User();
-        user.setNombre(username);
-        user.setEmail(email);
-        user.setPassword(password);
-
-        userService.guardarUsuario(user);
-
-        return "redirect:/login.html"; // después de registrar, redirigir a login o donde quieras
+    @PostMapping
+    public String registrarUsuario(@ModelAttribute User usuario, Model model) {
+        try {
+            userService.registrarUsuario(usuario.getEmail(), usuario.getPassword());
+            return "redirect:/login?registroExitoso";
+        } catch (Exception e) {
+            model.addAttribute("error", "El email ya está registrado");
+            return "registro";
+        }
     }
 }

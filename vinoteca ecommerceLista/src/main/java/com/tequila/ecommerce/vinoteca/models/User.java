@@ -1,73 +1,35 @@
-package com.tequila.ecommerce.vinoteca.models;
+package com.tequila.vinoteca.models;
 
 import jakarta.persistence.*;
-import java.util.List;
+import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import java.util.Collection;
+import java.util.Collections;
 
 @Entity
-@Table(name = "users") // nombre de la tabla en la base de datos
-public class User {
-
-    @Id // Marca este campo como la clave primaria
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // El valor de este campo se generará automáticamente
-    @Column(name = "id")
+@Data
+public class User implements UserDetails {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nombre") // nombre de la columna en la base de datos
-    private String name;
+    @Column(unique = true, nullable = false)
+    private String email; // Cambiado de username a email para Vinoteca
 
-    @Column(name = "email") // nombre de la columna en la base de datos
-    private String email;
-
-    @Column(name = "password") // nombre de la columna en la base de datos
+    @Column(nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "user") // Define una relación de uno a muchos con la entidad Order
-    private List<Order> orders; // almacena todas las compras realizadas por el usuario.
+    private String rol = "ROLE_USER"; // Rol por defecto
 
-    // Getters estándar JavaBean
-    public Long getId() {
-        return id;
+    // Métodos requeridos por UserDetails
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority(rol));
     }
-
-    public String getNombre() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public List<Order> getPedidos() {
-        return orders;
-    }
-
-    // Setters con retorno para encadenar
-    public User setId(Long id) {
-        this.id = id;
-        return this;
-    }
-
-    public User setNombre(String nombre) {
-        this.name = nombre;
-        return this;
-    }
-
-    public User setEmail(String email) {
-        this.email = email;
-        return this;
-    }
-
-    public User setPassword(String password) {
-        this.password = password;
-        return this;
-    }
-
-    public User setPedidos(List<Order> orders) {
-        this.orders = orders;
-        return this;
-    }
+    @Override public boolean isAccountNonExpired() { return true; }
+    @Override public boolean isAccountNonLocked() { return true; }
+    @Override public boolean isCredentialsNonExpired() { return true; }
+    @Override public boolean isEnabled() { return true; }
 }

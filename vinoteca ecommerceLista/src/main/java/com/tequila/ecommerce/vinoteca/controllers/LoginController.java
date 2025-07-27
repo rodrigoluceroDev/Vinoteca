@@ -1,56 +1,47 @@
 package com.tequila.ecommerce.vinoteca.controllers;
 
+import com.tequila.ecommerce.vinoteca.dto.LoginRequest; // Import del DTO externo
 import com.tequila.ecommerce.vinoteca.models.User;
 import com.tequila.ecommerce.vinoteca.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpSession;
 
-@Controller // Cambiado de @RestController
+@RestController
 @RequestMapping("/auth")
 public class LoginController {
 
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping("/login")
-    public String login(@ModelAttribute LoginRequest loginRequest, 
-                       HttpSession session) { // Añadido HttpSession
-        
-        User user = userService.encontrarPorEmail(loginRequest.getEmail());
-        
-        if (user != null && user.getPassword().equals(loginRequest.getPassword())) {
-            session.setAttribute("currentUser", user.getNombre()); // Guarda nombre en sesión
-            return "redirect:/"; // Redirige a página principal
+    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
+        // 1. Validación básica
+        if (loginRequest.getEmail() == null || loginRequest.getPassword() == null || 
+            loginRequest.getEmail().isBlank() || loginRequest.getPassword().isBlank()) {
+            return ResponseEntity.badRequest().body("Email y contraseña son obligatorios");
+        }
+
+        // 2. Normalización de inputs
+        String email = loginRequest.getEmail().toLowerCase().trim();
+        String password = loginRequest.getPassword().trim();
+
+        // 3. Buscar usuario en BD
+        User user = userService.encontrarPorEmail(email);
+        if (user == null) {
+            return ResponseEntity.status(401).body("Usuario no registrado");
+        }
+
+        // 4. Comparación segura con BCrypt
+        if (passwordEncoder.matches(password, user.getPassword())) {
+            return ResponseEntity.ok("Login exitoso para: " + user.getNombre());
         } else {
-            return "redirect:/login?error"; // Redirige con parámetro de error
-        }
-    }
-
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate(); // Elimina la sesión
-        return "redirect:/login?logout"; // Redirige con parámetro de logout
-    }
-
-    // Clase interna se mantiene igual
-    public static class LoginRequest {
-        private String email;
-        private String password;
-
-        // getters y setters
-        public String getEmail() {
-            return email;
-        }
-        public void setEmail(String email) {
-            this.email = email;
-        }
-        public String getPassword() {
-            return password;
-        }
-        public void setPassword(String password) {
-            this.password = password;
+            return ResponseEntity.status(401).body("Contraseña incorrecta");
         }
     }
 }
+    

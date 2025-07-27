@@ -24,6 +24,12 @@
     </properties>
 
     <dependencies>
+        <!-- Spring Security (NUEVA DEPENDENCIA) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
         <!-- JPA para persistencia -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -56,8 +62,7 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
-
-        
+		
         <!-- Thymeleaf para las vistas HTML -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -80,17 +85,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>java21</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <maven.compiler.source>21</maven.compiler.source>
-                <maven.compiler.target>21</maven.compiler.target>
-            </properties>
-        </profile>
-    </profiles>
 </project>
