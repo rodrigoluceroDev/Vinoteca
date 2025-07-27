@@ -1,4 +1,4 @@
-package com.tequila.vinoteca.models;
+package com.tequila.ecommerce.vinoteca.models;
 
 import jakarta.persistence.*;
 import lombok.Data;

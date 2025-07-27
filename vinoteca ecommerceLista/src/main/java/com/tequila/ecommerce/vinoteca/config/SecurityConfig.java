@@ -1,4 +1,4 @@
-package com.tequila.vinoteca.config;
+package com.tequila.ecommerce.vinoteca.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
